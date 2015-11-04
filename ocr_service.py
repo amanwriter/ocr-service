@@ -7,6 +7,8 @@ import asyncio
 import math
 
 img = ''
+MY_URL = '192.168.80.69'
+GHOST_ADDRESS = 'http://192.168.80.100:8000/'
 
 
 # Helper Function to find distance between 2 points.
@@ -36,7 +38,7 @@ class TaggerService(HTTPService):
                           request.match_info.get('x2'), request.match_info.get('y2'))
         nimg = img.crop([int(x1), int(y1), int(x2), int(y2)])
         nimg.save('ztemp.png')
-        subprocess.check_output(['python', 'med_img/sub_img/onep.py'])
+        subprocess.check_output(['python', 'onep.py'])
         f = open('ltrace.txt', 'r')
         f2 = []
         cnt = -1
@@ -84,7 +86,7 @@ class TaggerService(HTTPService):
                     pen_cords = (int(cords[0]), int(cords[1]))
                     ghost_data += line.split('*')[0] + '\n'
         ghost_data += '1 1 0\n'
-        requests.post('http://192.168.80.100:8000/', ghost_data)
+        requests.post(GHOST_ADDRESS, ghost_data)
         f.close()
         self.ocrres = asyncio.Future()
         res = yield from self.ocrres
@@ -94,12 +96,11 @@ class TaggerService(HTTPService):
     @get(path='/ocrres/{res}')
     def req5(self, request: Request):
         self.ocrres.set_result(request.match_info.get('res'))
-        print('DONE!!')
         return Response(status=200, body='thanx'.encode())
 
 
 if __name__ == '__main__':
-    http = TaggerService('192.168.80.69', 4501)
+    http = TaggerService(MY_URL, 4501)
     Host.configure('TaggerService')
     Host.attach_http_service(http)
     Host.ronin = True
