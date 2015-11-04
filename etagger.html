@@ -22,8 +22,7 @@ function xx1(theUrl){
     document.getElementById("url").value = '';}
     }
   };
-xmlhttp.open("GET",theUrl+document.getElementById("tag").value+encodeURIComponent(document.getElementById("url").value), true);
-document.getElementById("tag").value='';
+xmlhttp.open("GET",theUrl+encodeURIComponent(document.getElementById("url").value), true);
 xmlhttp.send();
 }
 
