@@ -1,0 +1,95 @@
+<div id="txt"></div>
+<div>
+<img id="img" onload="setup_canvas()" />
+<canvas id="can" onmousedown="start(event)" onmouseup="end(event)" onmousemove="move(event)"
+        style="position:absolute;z-index:20;top:0;left:0;height:0;width:0;"></canvas>
+</div>
+<button onclick="xx1('http://192.168.80.69:4501/image/')">Upload</button>
+<input id="url" type="text"/><br>
+
+<script>
+function xx1(theUrl){
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    document.getElementById("txt").innerHTML=xmlhttp.responseText;
+    alert(xmlhttp.responseText);
+    if (document.getElementById("url").value.length>5){
+    document.getElementById("img").src = document.getElementById("url").value;
+    setup_canvas();
+    document.getElementById("url").value = '';}
+    }
+  };
+xmlhttp.open("GET",theUrl+document.getElementById("tag").value+encodeURIComponent(document.getElementById("url").value), true);
+document.getElementById("tag").value='';
+xmlhttp.send();
+}
+
+var x1=0,x2=0,y1=0,y2=0;
+var can  = document.getElementById("can");
+var ctx = can.getContext("2d");
+ctx.strokeStyle = 'cyan';
+var dragging = 0;
+
+var reqer = 'ocr';
+
+function toggledrag(){
+if (reqer=='crop'){reqer = 'ocr';}
+else{reqer = 'crop';}
+
+}
+
+function setup_canvas(){
+
+var el = document.getElementById('img');
+var bbox = el.getBoundingClientRect();
+console.log(bbox);
+can.style.top = bbox.top + window.scrollY;
+can.style.left = bbox.left + + window.scrollX;
+can.height = bbox.height;
+can.width = bbox.width;
+can.style.height = bbox.height;
+can.style.width = bbox.width;
+
+}
+
+function start(e){
+setup_canvas();
+e.preventDefault();
+dragging=1;
+var el = document.getElementById('img');
+x1 = e.clientX - el.getBoundingClientRect().left;
+y1 = e.clientY - el.getBoundingClientRect().top;
+
+console.log(x1+" "+y1);
+
+}
+
+function move(e){
+e.preventDefault();
+
+if (dragging==1){
+
+ctx.clearRect(0,0,can.width, can.height);
+
+var el = document.getElementById('img');
+
+var x = e.clientX - el.getBoundingClientRect().left;
+var y = e.clientY - el.getBoundingClientRect().top;
+ctx.strokeRect(x1, y1, x-x1, y-y1);
+}
+}
+
+function end(e){
+e.preventDefault();
+dragging=0;
+var el = document.getElementById('img');
+x2 = e.clientX - el.getBoundingClientRect().left;
+y2 = e.clientY - el.getBoundingClientRect().top;
+xx1('http://192.168.80.69:4501/'+reqer+'/'+x1+'/'+y1+'/'+x2+'/'+y2);
+}
+
+
+</script>
